@@ -10,22 +10,35 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
     try {
+      console.log('Attempting login with:', { email });
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
 
+      const responseText = await response.text();
+      console.log('Server response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid server response');
+      }
+
       if (response.ok) {
-        const data = await response.json();
         localStorage.setItem('token', data.token);
         router.push('/dashboard');
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Login failed');
+        setError(data.message || 'Login failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');

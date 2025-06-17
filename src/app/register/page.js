@@ -10,19 +10,33 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
     try {
+      console.log('Attempting registration with:', { email });
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
 
+      const responseText = await response.text();
+      console.log('Server response:', responseText);
+
+      let errorData;
+      try {
+        errorData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error('Invalid server response');
+      }
+
       if (response.ok) {
         router.push('/login');
       } else {
-        const errorData = await response.json();
         setError(errorData.message || 'Registration failed');
       }
     } catch (err) {
