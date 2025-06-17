@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,9 +36,13 @@ export default function LoginPage() {
       }
 
       if (response.ok) {
+        // Set both cookie and localStorage
+        Cookies.set('token', data.token, { secure: true });
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        router.push('/dashboard');
+        
+        // Use replace instead of push to prevent back button issues
+        router.replace('/dashboard');
       } else {
         setError(data.message || 'Login failed');
       }
