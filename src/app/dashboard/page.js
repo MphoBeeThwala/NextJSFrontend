@@ -1,42 +1,61 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-
-    // Get user data from token
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
+    const initializeDashboard = async () => {
       try {
-        const userData = JSON.parse(userStr);
-        setUser(userData);
+        // Check for token and user data
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+
+        if (!token || !userStr) {
+          router.replace('/login');
+          return;
+        }
+
+        try {
+          const userData = JSON.parse(userStr);
+          setUser(userData);
+        } catch (err) {
+          console.error('Error parsing user data:', err);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          router.replace('/login');
+          return;
+        }
       } catch (err) {
-        console.error('Error parsing user data:', err);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.push('/login');
+        console.error('Dashboard initialization error:', err);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    initializeDashboard();
   }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    router.push('/login');
+    router.replace('/login');
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   if (!user) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return null;
   }
 
   return (
