@@ -7,8 +7,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+      try {        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shop`);
         if (response.ok) {
           const data = await response.json();
           setProducts(data);
