@@ -36,6 +36,7 @@ export default function LoginPage() {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         router.push('/dashboard');
       } else {
         setError(data.message || 'Login failed');
